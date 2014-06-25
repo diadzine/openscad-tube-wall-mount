@@ -21,6 +21,19 @@ module RoundingEdge(radius, length) {
 	}
 }
 
+module ScrewHole(hole_diameter, countersink_diameter, length) {	
+	countersink_radius = countersink_diameter / 2;
+
+	union() {
+		translate([0, 0, -pad]) {
+			cylinder(r=hole_diameter/2, h=length+2*pad);
+		}
+		translate([0, 0, length+2*pad-countersink_radius]) {
+			cylinder(r1=0, r2=countersink_radius, h=countersink_radius+pad);
+		}
+	}
+}
+
 module Hook(diameter, depth, gap, length, thickness) {
 	width = gap + diameter + thickness;
 	height = depth + thickness;
@@ -44,5 +57,35 @@ module Hook(diameter, depth, gap, length, thickness) {
 	}	
 }
 
+module TubeWallMount(width, height, thickness, diameter, gap, wide) {
+	difference() {
+		union() {
+			cube([width, height, thickness]);
+			translate([wide, 0, thickness]) {
+				rotate([0, -90, 0]) {
+					Hook(diameter, height-thickness, gap, wide, thickness);
+				}
+			}
+			translate([width, 0, thickness]) {
+				rotate([0, -90, 0]) {
+					Hook(diameter, height-thickness, gap, wide, thickness);
+				}
+			}
+			translate([width/2, height/2, thickness]) {
+				cylinder(r=5, h=10);
+			}
+		}
+		translate([width/2, height/2, ]) {
+			ScrewHole(4, 8, 15);
+		}
+	}
+}
+
 /****** RENDERS ****/
-Hook(10, 15, 15, 10, 5);
+plate_width = 80;
+plate_height = 20;
+plate_thickness = 5;
+tube_diameter = 10;
+tube_wall_gap = 15;
+hooks_width = 10;
+TubeWallMount(plate_width, plate_height, plate_thickness, tube_diameter, tube_wall_gap, hooks_width);
